@@ -1,14 +1,18 @@
 package controllers
 
 import (
+	models "api_beego/models"
+	_ "context"
+	"encoding/json"
 	_ "fmt"
+	"strconv"
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	_ "github.com/beego/beego/v2/client/cache"
+	_ "github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/core/validation"
+	_ "github.com/leekchan/accounting"
 	_ "github.com/shopspring/decimal"
-    _ "github.com/leekchan/accounting"
-	_ "github.com/astaxie/beego/validation"
-	models "api_beego/models"
-	_ "strconv"
 )
 
 type CollateralController struct {
@@ -25,10 +29,17 @@ type ambilCollateral struct {
 	Final_col_price int
 	Ljk_id int
 	Document_path string
-	Username string
-	Email string
-	Ktp_no string
-	Type_name string
+}
+
+type getCollateral struct {
+    Acc_id  int
+	Type_id int	
+	Owner_name string
+	Coll_location string
+	Initial_col_price int 
+	Final_col_price int
+	Ljk_id int
+	Document_path string
 }
 
 func (api *CollateralController) GetAllCollateral() {
@@ -126,138 +137,146 @@ func (api *CollateralController) GetCollateralByLocation() {
 	api.ServeJSON()
 }
 
+func AllCollateralCheck(api *CollateralController) string {
+	valid := validation.Validation{}
+
+	// var Posts []*models.Posts
+
+	frm := api.Ctx.Input.RequestBody
+	ul := &getCollateral{}
+	json.Unmarshal(frm, ul)
+
+	Acc_id := ul.Acc_id
+	Type_id := ul.Type_id
+	Owner_name := ul.Owner_name
+	Coll_location := ul.Coll_location
+	Initial_col_price := ul.Initial_col_price
+	Final_col_price := ul.Final_col_price
+	Ljk_id := ul.Ljk_id
+	Document_path := ul.Document_path
+
+	u := &getCollateral{Acc_id, Type_id, Owner_name, Coll_location, Initial_col_price, Final_col_price, Ljk_id, Document_path}
+	valid.Required(u.Acc_id, "Acc_id")
+	valid.Required(u.Type_id, "Type_id")
+	valid.Required(u.Owner_name, "Owner_name")
+	valid.Required(u.Coll_location, "Coll_location")
+	valid.Required(u.Initial_col_price, "Initial_col_price")
+	valid.Required(u.Final_col_price, "Final_col_price")
+	valid.Required(u.Ljk_id, "Ljk_id")
+	valid.Required(u.Document_path, "Document_path")
+
+	if valid.HasErrors() {
+		// If there are error messages it means the validation didn't pass
+		// Print error message
+		for _, err := range valid.Errors {
+			return err.Key + err.Message
+		}
+	}
+
+	return ""
+}
+
 func (api *CollateralController) CreateCollateral() {
 
-	// frm := api.Ctx.Input.RequestBody
-	// if AllPostsCheck(api) != "" {
-	// 	api.Data["json"] = AllPostsCheck(api)
-	// 	api.ServeJSON()
-	// 	return
-	// }
+	frm := api.Ctx.Input.RequestBody
 
-	// o := orm.NewOrm()
-	// o.Using("default")
+	if AllCollateralCheck(api) != "" {
+		api.Data["json"] = AllCollateralCheck(api)
+		api.ServeJSON()
+		return
+	}
 
-	// u := &ambilPosts{}
-	// json.Unmarshal(frm, u)
-	// idInt, _ := strconv.Atoi(api.Ctx.Input.Param(":id"))
-	// Title := u.Title
-	// Content := u.Content
-	// Category := u.Category
-	// Status := u.Status
-	// PostsQry := models.Posts{Id: idInt, Title: Title, Content: Content, Category: Category, Status: Status}
-    acc_id := api.GetString("acc_id")
-    if acc_id == "" {
-        api.Ctx.WriteString("")
-        return
-    } 
-	type_id := api.GetString("type_id")
-    if type_id == "" {
-        api.Ctx.WriteString("")
-        return
-    } 
-	owner_name := api.GetString("owner_name")
-    if owner_name == "" {
-        api.Ctx.WriteString("")
-        return
-    } 
-	coll_location := api.GetString("coll_location")
-    if coll_location == "" {
-        api.Ctx.WriteString("")
-        return
-    } 
-	initial_col_price := api.GetString("initial_col_price")
-    if initial_col_price == "" {
-        api.Ctx.WriteString("")
-        return
-    } 
-	final_col_price := api.GetString("final_col_price")
-    if final_col_price == "" {
-        api.Ctx.WriteString("")
-        return
-    } 
-	ljk_id := api.GetString("ljk_id")
-    if ljk_id == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-	document_path := api.GetString("document_path")
-    if document_path == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-    o := orm.NewOrm()
+	o := orm.NewOrm()
 	o.Using("default")
-	var Collateral []*models.Collateral
-	var sql string
-	sql = "INSERT INTO collateral (acc_id, type_id, owner_name, coll_location, initial_col_price, final_col_price, ljk_id, document_path) VALUES ('"+api.GetStrings("acc_id")[0]+"'"
-	sql += ",'"+api.GetStrings("type_id")[0]+"','"+api.GetStrings("owner_name")[0]+"','"+api.GetStrings("coll_location")[0]+"','"+api.GetStrings("initial_col_price")[0]+"'"
-	sql += ",'"+api.GetStrings("final_col_price")[0]+"','"+api.GetStrings("ljk_id")[0]+"','"+api.GetStrings("document_path")[0]+"')"
-	o.Raw(sql).QueryRows(&Collateral)
-	api.Data["json"] = 1
+	u:= &getCollateral{}
+	json.Unmarshal(frm,u)
+	Acc_id := u.Acc_id
+	Type_id := u.Type_id
+	Owner_name := u.Owner_name
+	Coll_location := u.Coll_location
+	Initial_col_price := u.Initial_col_price
+	Final_col_price := u.Final_col_price
+	Ljk_id := u.Ljk_id
+	Document_path := u.Document_path
+	PostsQry := models.Collateral{Acc_id: Acc_id, Type_id: Type_id, Owner_name: Owner_name, Coll_location: Coll_location, Initial_col_price: Initial_col_price, Final_col_price: Final_col_price, Ljk_id: Ljk_id, Document_path: Document_path}
+	_, err := o.Insert(&PostsQry)
+	if err != nil {
+		api.Data["json"] = err.Error()
+		api.ServeJSON()
+	}
+	api.Data["json"] = "Successfully save data "
 	api.ServeJSON()
 }
 
-func (api *CollateralController) EditCollateral() {
-    acc_id := api.GetString("acc_id")
-    if acc_id == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-	type_id := api.GetString("type_id")
-    if type_id == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-	owner_name := api.GetString("owner_name")
-    if owner_name == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-	coll_location := api.GetString("coll_location")
-    if coll_location == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-	initial_col_price := api.GetString("initial_col_price")
-    if initial_col_price == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-	final_col_price := api.GetString("final_col_price")
-    if final_col_price == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-	ljk_id := api.GetString("ljk_id")
-    if ljk_id == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-	document_path := api.GetString("document_path")
-    if document_path == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-	coll_id := api.GetString("coll_id")
-    if coll_id == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-    o := orm.NewOrm()
-	o.Using("default")
-	var Collateral []*models.Collateral
-	var sql string
-	sql = "select coll_id from collateral where coll_id = '"+api.GetString("coll_id")+"'";
-	num, err := o.Raw(sql).QueryRows(&Collateral)
-	if err != orm.ErrNoRows && num > 0 {
-		api.Data["json"] = ""
-	    api.ServeJSON()   
+func AllCollateralCheckWithId(api *CollateralController) string {
+	valid := validation.Validation{}
+
+	// var Posts []*models.Posts
+
+	frm := api.Ctx.Input.RequestBody
+	Coll_id, _ := strconv.Atoi(api.Ctx.Input.Param(":id"))
+	ul := &getCollateral{}
+	json.Unmarshal(frm, ul)
+	Acc_id := ul.Acc_id
+	Type_id := ul.Type_id
+	Owner_name := ul.Owner_name
+	Coll_location := ul.Coll_location
+	Initial_col_price := ul.Initial_col_price
+	Final_col_price := ul.Final_col_price
+	Ljk_id := ul.Ljk_id
+	Document_path := ul.Document_path
+
+	u := &ambilCollateral{Coll_id,Acc_id,Type_id, Owner_name, Coll_location, Initial_col_price, Final_col_price, Ljk_id, Document_path}
+	valid.Required(u.Coll_id, "Coll_id")
+	valid.Required(u.Acc_id, "Acc_id")
+	valid.Required(u.Type_id, "Type_id")
+	valid.Required(u.Owner_name, "Owner_name")
+	valid.Required(u.Coll_location, "Coll_location")
+	valid.Required(u.Initial_col_price, "Initial_col_price")
+	valid.Required(u.Final_col_price, "Final_col_price")
+	valid.Required(u.Ljk_id, "Ljk_id")
+	valid.Required(u.Document_path, "Document_path")
+
+	if valid.HasErrors() {
+		// If there are error messages it means the validation didn't pass
+		// Print error message
+		for _, err := range valid.Errors {
+			return err.Key + err.Message
+		}
 	}
-	sql = "UPDATE collateral SET acc_id = '"+api.GetStrings("acc_id")[0]+"', type_id = '"+api.GetStrings("type_id")[0]+"', owner_name = '"+api.GetStrings("owner_name")[0]+"'"
-	sql += ", coll_location = '"+api.GetStrings("coll_location")[0]+"', initial_col_price = '"+api.GetStrings("initial_col_price")[0]+"', final_col_price = '"+api.GetStrings("final_col_price")[0]+"'"
-	sql += ", ljk_id = '"+api.GetStrings("ljk_id")[0]+"', document_path = '"+api.GetStrings("document_path")[0]+"' where coll_id = '"+api.GetStrings("coll_id")[0]+"'" 
-	o.Raw(sql).QueryRows(&Collateral)
-	api.Data["json"] = "successfully edit collateral with coll_id "+api.GetStrings("coll_id")[0]
+
+	return ""
+}
+
+func (api *CollateralController) EditCollateral() {
+	frm := api.Ctx.Input.RequestBody
+
+	if AllCollateralCheckWithId(api) != "" {
+		api.Data["json"] = AllCollateralCheckWithId(api)
+		api.ServeJSON()
+		return
+	}
+
+	o := orm.NewOrm()
+	o.Using("default")
+
+	u := &getCollateral{}
+	json.Unmarshal(frm, u)
+	Coll_id, _ := strconv.Atoi(api.Ctx.Input.Param(":id"))
+	Acc_id := u.Acc_id
+	Type_id := u.Type_id
+	Owner_name := u.Owner_name
+	Coll_location := u.Coll_location
+	Initial_col_price := u.Initial_col_price
+	Final_col_price := u.Final_col_price
+	Ljk_id := u.Ljk_id
+	Document_path := u.Document_path
+	PostsQry := models.Collateral{Coll_id: Coll_id,Acc_id: Acc_id, Type_id: Type_id, Owner_name: Owner_name, Coll_location: Coll_location, Initial_col_price: Initial_col_price, Final_col_price: Final_col_price, Ljk_id: Ljk_id, Document_path: Document_path}
+	_, err := o.Update(&PostsQry)
+	if err != nil {
+		api.Data["json"] = err.Error()
+		api.ServeJSON()
+	}
+	api.Data["json"] = "Successfully update data "
 	api.ServeJSON()
 }
