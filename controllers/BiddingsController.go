@@ -35,6 +35,12 @@ type getBiddings struct {
 	Status_name string
 }
 
+type cekBiddings struct {
+    Auction_id  int
+	Bidder_id int	
+	Status int
+}
+
 
 func (api *BiddingsController) GetAllBids() {
     o := orm.NewOrm()
@@ -77,14 +83,14 @@ func AllBidingCheck(api *BiddingsController) string {
 	// var Posts []*models.Posts
 
 	frm := api.Ctx.Input.RequestBody
-	ul := &getBiddings{}
+	ul := &cekBiddings{}
 	json.Unmarshal(frm, ul)
 
 	Auction_id := ul.Auction_id
 	Bidder_id := ul.Bidder_id
 	Status := ul.Status
 
-	u := &getBiddings{Auction_id, Bidder_id, Status}
+	u := &cekBiddings{Auction_id, Bidder_id, Status}
 	valid.Required(u.Auction_id, "Auction_id")
 	valid.Required(u.Bidder_id, "Bidder_id")
 	valid.Required(u.Status, "Status")
@@ -111,12 +117,12 @@ func (api *BiddingsController) CreateBiddings() {
 
 	o := orm.NewOrm()
 	o.Using("default")
-	u:= &cekUser{}
+	u:= &cekBiddings{}
 	json.Unmarshal(frm,u)
 	Auction_id := u.Auction_id
 	Bidder_id := u.Bidder_id
 	Status := u.Status
-	PostsQry := models.UserAccount{Auction_id: Auction_id, Bidder_id: Bidder_id, Status: Status}
+	PostsQry := models.Biddings{Auction_id: Auction_id, Bidder_id: Bidder_id, Status: Status}
 	_, err := o.Insert(&PostsQry)
 	if err != nil {
 		api.Data["json"] = err.Error()
@@ -145,7 +151,7 @@ func (api *BiddingsController) CancelBid() {
 	}
 	sql = "UPDATE biddings SET status = 3 where bid_id = '"+api.Ctx.Input.Param(":id")+"'" 	
 	o.Raw(sql).QueryRows(&Biddings)
-	api.Data["json"] = "successfully cancel biddings with bid_id = '"+c+"'" 	
+	api.Data["json"] = "successfully cancel biddings with bid_id = '"+api.Ctx.Input.Param(":id")+"'" 	 	
 	api.ServeJSON()
 }
 
