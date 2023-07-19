@@ -143,7 +143,7 @@ func (api *AuctionsController) GetAuctionsByDueDate() {
 	sql = "select auctions.*,collateral.*,option_method.name as auction_method_name,useraccount.username as accepted_bidder_name from auctions"
 	sql += " left join m_option as option_method on option_method.no  = auctions.auction_method and option_method.type = 2"
 	sql += " left join collateral on auctions.coll_id  = collateral.coll_id"
-	sql += " left join useraccount on useraccount.user_id  = auctions.accepted_bidder where to_char(auctions.due_date::date,'yyyy-mm-dd') = to_char('"++api.GetStrings("due_date")[0]++"'::date,'yyyy-mm-dd')'"
+	sql += " left join useraccount on useraccount.user_id  = auctions.accepted_bidder where to_char(auctions.due_date::date,'yyyy-mm-dd') = to_char('"+api.GetStrings("due_date")[0]+"'::date,'yyyy-mm-dd')'"
 
 	fmt.Println(sql)
 	num, err := o.Raw(sql).QueryRows(&Auctions)

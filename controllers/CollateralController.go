@@ -29,6 +29,24 @@ type ambilCollateral struct {
 	Final_col_price int
 	Ljk_id int
 	Document_path string
+	User_id int
+	Username string
+	Password string	
+	Email string
+	Status int
+	Ktp_no string
+}
+
+type cekCollateral struct {
+    Coll_id int
+	Acc_id  int
+	Type_id int	
+	Owner_name string
+	Coll_location string
+	Initial_col_price int 
+	Final_col_price int
+	Ljk_id int
+	Document_path string
 }
 
 type getCollateral struct {
@@ -226,7 +244,7 @@ func AllCollateralCheckWithId(api *CollateralController) string {
 	Ljk_id := ul.Ljk_id
 	Document_path := ul.Document_path
 
-	u := &ambilCollateral{Coll_id,Acc_id,Type_id, Owner_name, Coll_location, Initial_col_price, Final_col_price, Ljk_id, Document_path}
+	u := &cekCollateral{Coll_id,Acc_id,Type_id, Owner_name, Coll_location, Initial_col_price, Final_col_price, Ljk_id, Document_path}
 	valid.Required(u.Coll_id, "Coll_id")
 	valid.Required(u.Acc_id, "Acc_id")
 	valid.Required(u.Type_id, "Type_id")

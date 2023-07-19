@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "49596c3b-bd44-4d4a-99fb-e6964339d375",
+		"_postman_id": "46011d4c-c360-461d-bc62-2ab0b1d0fea0",
 		"name": "API BEEGO",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "13814383"
 	},
 	"item": [
 		{
@@ -68,8 +69,17 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\":\"riza2\",\r\n    \"password\":\"riza2\",\r\n    \"email\":\"riza2@yahoo.com\",\r\n    \"status\": 2,\r\n    \"ktp_no\": \"1132132321312\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "http://localhost:9333/CreateUser?username=riza2&password=riza2&email=riza2@yahoo.com&status=2&ktp_no=1132132321312",
+							"raw": "http://localhost:9333/CreateUser",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -77,28 +87,6 @@
 							"port": "9333",
 							"path": [
 								"CreateUser"
-							],
-							"query": [
-								{
-									"key": "username",
-									"value": "riza2"
-								},
-								{
-									"key": "password",
-									"value": "riza2"
-								},
-								{
-									"key": "email",
-									"value": "riza2@yahoo.com"
-								},
-								{
-									"key": "status",
-									"value": "2"
-								},
-								{
-									"key": "ktp_no",
-									"value": "1132132321312"
-								}
 							]
 						}
 					},
@@ -406,7 +394,7 @@
 				{
 					"name": "Testing GetAllCollateral",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"url": {
 							"raw": "http://localhost:9333/GetAllCollateral",
@@ -425,7 +413,7 @@
 				{
 					"name": "Testing GetCollateralByID",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"url": {
 							"raw": "http://localhost:9333/GetCollateralByID/?coll_id=1",
@@ -451,7 +439,7 @@
 				{
 					"name": "Testing GetCollateralByCategory",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"url": {
 							"raw": "http://localhost:9333/GetCollateralByCategory/?type_id=161",
@@ -477,7 +465,7 @@
 				{
 					"name": "Testing GetCollateralByLJK",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"url": {
 							"raw": "http://localhost:9333/GetCollateralByLJK?ljk_id=1",
@@ -502,7 +490,7 @@
 				{
 					"name": "Testing GetCollateralByLocation",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"url": {
 							"raw": "http://localhost:9333/GetCollateralByLocation?coll_location=bekasi",
@@ -642,7 +630,7 @@
 				{
 					"name": "Testing GetAllAuctions",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"url": {
 							"raw": "http://localhost:9333/GetAllAuctions",
@@ -661,7 +649,7 @@
 				{
 					"name": "Testing GetAuctionsByID",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"url": {
 							"raw": "http://localhost:9333/GetAuctionsByID/?auction_id=1",
@@ -687,7 +675,7 @@
 				{
 					"name": "Testing GetAuctionsByDueDate",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"url": {
 							"raw": "http://localhost:9333/GetAuctionsByDueDate?due_date=2019-12-02",
@@ -712,10 +700,10 @@
 				{
 					"name": "Testing GetAuctionsByCollateral",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:9333/GetAuctionsByCollateral?coll_location=jakarta",
+							"raw": "http://localhost:9333/GetAuctionsByCollateral?coll_id=0",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -726,8 +714,8 @@
 							],
 							"query": [
 								{
-									"key": "coll_location",
-									"value": "jakarta"
+									"key": "coll_id",
+									"value": "0"
 								}
 							]
 						}
@@ -739,8 +727,17 @@
 					"request": {
 						"method": "POST",
 						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"coll_id\" : 2,\r\n    \"From_date\" : \"2019-06-05\",\r\n    \"Due_date\" : \"2019-08-05\",\r\n    \"Auction_method\" : 2,\r\n    \"Down_payment\" : 100000,\r\n    \"Description\" : \"note\",\r\n    \"Status\" : 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
 						"url": {
-							"raw": "http://localhost:9333/CreateAuctions?coll_id=2&from_date=2019-06-05&due_date=2019-08-05&auction_method=2&down_payment=100000&description=note&status=1",
+							"raw": "http://localhost:9333/CreateAuctions",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -750,34 +747,6 @@
 								"CreateAuctions"
 							],
 							"query": [
-								{
-									"key": "coll_id",
-									"value": "2"
-								},
-								{
-									"key": "from_date",
-									"value": "2019-06-05"
-								},
-								{
-									"key": "due_date",
-									"value": "2019-08-05"
-								},
-								{
-									"key": "auction_method",
-									"value": "2"
-								},
-								{
-									"key": "down_payment",
-									"value": "100000"
-								},
-								{
-									"key": "description",
-									"value": "note"
-								},
-								{
-									"key": "status",
-									"value": "1"
-								},
 								{
 									"key": "auction_count",
 									"value": "0",
@@ -791,23 +760,18 @@
 				{
 					"name": "Testing DeleteAuction",
 					"request": {
-						"method": "POST",
+						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:9333/DeleteAuction?auction_id=2",
+							"raw": "http://localhost:9333/DeleteAuction/2",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "9333",
 							"path": [
-								"DeleteAuction"
-							],
-							"query": [
-								{
-									"key": "auction_id",
-									"value": "2"
-								}
+								"DeleteAuction",
+								"2"
 							]
 						}
 					},

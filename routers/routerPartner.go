@@ -6,12 +6,6 @@ import (
 )
 
 func init() {
- 	beego.Router("/CreateUser", &controllers.UserAccountController{}, "post:CreateUser")
-	beego.Router("/EditUser", &controllers.UserAccountController{}, "post:EditUser")
-	beego.Router("/DeleteUser", &controllers.UserAccountController{}, "post:DeleteUser")
-	beego.Router("/DeactivateUser", &controllers.UserAccountController{}, "post:DeactivateUser")
-	beego.Router("/UserLogin", &controllers.UserAccountController{}, "post:UserLogin")
-	beego.Router("/AuthenticateUser", &controllers.UserAccountController{}, "post:AuthenticateUser")
 	beego.Router("/CreatePartner", &controllers.PartnerAccountController{}, "post:CreatePartner")
 	beego.Router("/EditPartner", &controllers.PartnerAccountController{}, "post:EditPartner")
 	beego.Router("/DeletePartner", &controllers.PartnerAccountController{}, "post:DeletePartner")

@@ -1,23 +1,35 @@
 package controllers
 
 import (
-	_ "fmt"
+	models "api_beego/models"
+	_ "context"
+	"encoding/json"
+	_"fmt"
+	_"strconv"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
+	_ "github.com/beego/beego/v2/client/cache"
+	_ "github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/core/validation"
+	_ "github.com/leekchan/accounting"
 	_ "github.com/shopspring/decimal"
-    _ "github.com/leekchan/accounting"
-	_ "github.com/astaxie/beego/validation"
-	models "api_beego/models"
-	_ "strconv"
 )
 
 type BiddingsController struct {
-	beego.Controller
+    	beego.Controller
 }
 
 type ambilBiddings struct {
     Bid_id int
 	Auction_id  int
+	Bidder_id int	
+	Status int
+	Status_name string
+}
+
+type getBiddings struct {
+    Auction_id  int
 	Bidder_id int	
 	Status int
 	Status_name string
@@ -59,51 +71,81 @@ func (api *BiddingsController) GetBidsByAuction() {
 	api.ServeJSON()
 }
 
+func AllBidingCheck(api *BiddingsController) string {
+	valid := validation.Validation{}
+
+	// var Posts []*models.Posts
+
+	frm := api.Ctx.Input.RequestBody
+	ul := &getBiddings{}
+	json.Unmarshal(frm, ul)
+
+	Auction_id := ul.Auction_id
+	Bidder_id := ul.Bidder_id
+	Status := ul.Status
+
+	u := &getBiddings{Auction_id, Bidder_id, Status}
+	valid.Required(u.Auction_id, "Auction_id")
+	valid.Required(u.Bidder_id, "Bidder_id")
+	valid.Required(u.Status, "Status")
+
+	if valid.HasErrors() {
+		// If there are error messages it means the validation didn't pass
+		// Print error message
+		for _, err := range valid.Errors {
+			return err.Key + err.Message
+		}
+	}
+
+	return ""
+}
+
 func (api *BiddingsController) CreateBiddings() {
-    auction_id := api.GetString("auction_id")
-    if auction_id == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-	bidder_id := api.GetString("bidder_id")
-    if bidder_id == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-	status := api.GetString("status")
-    if status == "" {
-        api.Ctx.WriteString("")
-        return
-    }
-    o := orm.NewOrm()
+    frm := api.Ctx.Input.RequestBody
+
+	if AllBidingCheck(api) != "" {
+		api.Data["json"] = AllBidingCheck(api)
+		api.ServeJSON()
+		return
+	}
+
+	o := orm.NewOrm()
 	o.Using("default")
-	var Biddings []*models.Biddings
-	var sql string
-	sql = "INSERT INTO biddings (auction_id,bidder_id,status) VALUES ('"+api.GetStrings("auction_id")[0]+"','"+api.GetStrings("bidder_id")[0]+"','"+api.GetStrings("status")[0]+"')"
-	o.Raw(sql).QueryRows(&Biddings)
-	api.Data["json"] = 1
+	u:= &cekUser{}
+	json.Unmarshal(frm,u)
+	Auction_id := u.Auction_id
+	Bidder_id := u.Bidder_id
+	Status := u.Status
+	PostsQry := models.UserAccount{Auction_id: Auction_id, Bidder_id: Bidder_id, Status: Status}
+	_, err := o.Insert(&PostsQry)
+	if err != nil {
+		api.Data["json"] = err.Error()
+		api.ServeJSON()
+	}
+	api.Data["json"] = "Successfully save data"
 	api.ServeJSON()
 }
 
 func (api *BiddingsController) CancelBid() {
-    bid_id := api.GetString("bid_id")
-    if bid_id == "" {
-        api.Ctx.WriteString("")
+    if api.Ctx.Input.Param(":id") == "" {
+        api.Ctx.WriteString("Bid id is empty")
         return
     }
+
+	
     o := orm.NewOrm()
 	o.Using("default")
 	var Biddings []*models.Biddings
 	var sql string
-	sql = "select bid_id from biddings where bid_id = '"+api.GetString("bid_id")+"'";
+	sql = "select bid_id from biddings where bid_id = '"+api.Ctx.Input.Param(":id")+"'";
 	num, err := o.Raw(sql).QueryRows(&Biddings)
 	if err != orm.ErrNoRows && num > 0 {
 		api.Data["json"] = ""
 	    api.ServeJSON()   
 	}
-	sql = "UPDATE biddings SET status = 3 where bid_id = '"+api.GetStrings("bid_id")[0]+"'" 	
+	sql = "UPDATE biddings SET status = 3 where bid_id = '"+api.Ctx.Input.Param(":id")+"'" 	
 	o.Raw(sql).QueryRows(&Biddings)
-	api.Data["json"] = "successfully cancel biddings with bid_id = "+api.GetStrings("bid_id")[0]
+	api.Data["json"] = "successfully cancel biddings with bid_id = '"+c+"'" 	
 	api.ServeJSON()
 }
 
@@ -113,18 +155,22 @@ func (api *BiddingsController) PayBidDownPayment() {
         api.Ctx.WriteString("")
         return
     }
+	if api.Ctx.Input.Param(":id") == "" {
+        api.Ctx.WriteString("bid id is empty")
+        return
+    }
     o := orm.NewOrm()
 	o.Using("default")
 	var Biddings []*models.Biddings
 	var sql string
-	sql = "select bid_id from biddings where bid_id = '"+api.GetString("bid_id")+"'";
+	sql = "select bid_id from biddings where bid_id = '"+api.Ctx.Input.Param(":id")+"'";
 	num, err := o.Raw(sql).QueryRows(&Biddings)
 	if err != orm.ErrNoRows && num > 0 {
 		api.Data["json"] = ""
 	    api.ServeJSON()   
 	}
-	sql = "UPDATE auctions SET down_payment = '"+api.GetStrings("down_payment")[0]+"' where auction_id = '"+api.GetStrings("auction_id")[0]+"'" 	
+	sql = "UPDATE auctions SET down_payment = '"+api.GetStrings("down_payment")[0]+"' where auction_id = '"+api.Ctx.Input.Param(":id")+"'" 	
 	o.Raw(sql).QueryRows(&Biddings)
-	api.Data["json"] = "successfully pay bid with auction_id = "+api.GetStrings("auction_id")[0]
+	api.Data["json"] = "successfully pay bid with auction_id = "+api.Ctx.Input.Param(":id")
 	api.ServeJSON()
 }
