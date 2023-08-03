@@ -6,4 +6,5 @@ RUN go install -v ./...
 
 EXPOSE 9333
 # Install server application
+RUN go build -o main .
 CMD ["go", "run", "main.go"]

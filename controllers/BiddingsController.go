@@ -4,8 +4,8 @@ import (
 	models "api_beego/models"
 	_ "context"
 	"encoding/json"
-	_"fmt"
-	_"strconv"
+	"fmt"
+	"strconv"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
@@ -41,14 +41,19 @@ type cekBiddings struct {
 	Status int
 }
 
+type PayBidDownPayment struct {
+    Down_payment  int
+}
+
 
 func (api *BiddingsController) GetAllBids() {
     o := orm.NewOrm()
 	o.Using("default")
 	var Biddings [] ambilBiddings
 	var sql string
-	sql = "select biddings.*,m_option.name as status_name from biddings"
-	sql += " join m_option on m_option.no = biddings.status and m_option.type = 5"
+	sql = "select biddings.*,m_option.name as status_name from biddings "
+	sql += "left join m_option on m_option.no = biddings.status and m_option.type = 5"
+	fmt.Println(sql)
 	num, err := o.Raw(sql).QueryRows(&Biddings)
 	if err != orm.ErrNoRows && num > 0 {
 		api.Data["json"] = Biddings		
@@ -67,11 +72,11 @@ func (api *BiddingsController) GetBidsByAuction() {
 	o.Using("default")
 	var Biddings [] ambilBiddings
 	var sql string
-	sql = "select biddings.*,m_option.name as status_name from biddings"
-	sql += " join m_option on m_option.no = biddings.status and m_option.type = 5 where auction_id = '"+api.GetStrings("auction_id")[0]+"'"
+	sql = "select biddings.*,m_option.name as status_name from biddings "
+	sql += "left join m_option on m_option.no = biddings.status and m_option.type = 5 where auction_id = '"+api.GetStrings("auction_id")[0]+"'"
 	num, err := o.Raw(sql).QueryRows(&Biddings)
 	if err != orm.ErrNoRows && num > 0 {
-		api.Data["json"] = Biddings[0]		
+		api.Data["json"] = Biddings	
 	}
 	
 	api.ServeJSON()
@@ -156,9 +161,14 @@ func (api *BiddingsController) CancelBid() {
 }
 
 func (api *BiddingsController) PayBidDownPayment() {
-    down_payment := api.GetString("down_payment")
-    if down_payment == "" {
-        api.Ctx.WriteString("")
+	frm := api.Ctx.Input.RequestBody
+	u:= &PayBidDownPayment{}
+	json.Unmarshal(frm,u)
+
+	Down_payment := strconv.Itoa(u.Down_payment)
+
+    if Down_payment == "" {
+        api.Ctx.WriteString("Down payment is empty")
         return
     }
 	if api.Ctx.Input.Param(":id") == "" {
@@ -172,10 +182,10 @@ func (api *BiddingsController) PayBidDownPayment() {
 	sql = "select bid_id from biddings where bid_id = '"+api.Ctx.Input.Param(":id")+"'";
 	num, err := o.Raw(sql).QueryRows(&Biddings)
 	if err != orm.ErrNoRows && num > 0 {
-		api.Data["json"] = ""
+		api.Data["json"] = "Failed pay bid"
 	    api.ServeJSON()   
 	}
-	sql = "UPDATE auctions SET down_payment = '"+api.GetStrings("down_payment")[0]+"' where auction_id = '"+api.Ctx.Input.Param(":id")+"'" 	
+	sql = "UPDATE auctions SET down_payment = "+Down_payment+" where auction_id = '"+api.Ctx.Input.Param(":id")+"'" 	
 	o.Raw(sql).QueryRows(&Biddings)
 	api.Data["json"] = "successfully pay bid with auction_id = "+api.Ctx.Input.Param(":id")
 	api.ServeJSON()
